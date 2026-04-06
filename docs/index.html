@@ -10,7 +10,7 @@ title: Home
 
 <script>
 async function load() {
-  const res = await fetch('/posts.json');
+  const res = await fetch('{{ "/posts.json" | relative_url }}');
   const posts = await res.json();
   const feed = document.getElementById('feed');
   const filters = document.getElementById('filters');

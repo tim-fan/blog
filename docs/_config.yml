@@ -1,5 +1,5 @@
 title: "Obsidian Headless Blog"
 description: "Minimal Jekyll scaffold for the headless static blog."
-baseurl: ""
-url: ""
+baseurl: "/blog"
+url: "https://tim-fan.github.io"
 markdown: kramdown
