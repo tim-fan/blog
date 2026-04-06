@@ -4,8 +4,7 @@ This repository contains a minimal Jekyll-based static blog and helper scripts f
 
 Repository and site
 - Repository: https://github.com/tim-fan/blog
-- Expected public site (project GitHub Pages): https://tim-fan.github.io/blog/  
-  Note: the site URL above is the standard project-site address once Pages are enabled; if you publish as a user site the URL will be `https://tim-fan.github.io/`.
+- Public site: https://tim-fan.github.io/blog/
 
 What’s in this repository
 - `spec.md` — project specification and implementation notes.
