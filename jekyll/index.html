@@ -1,0 +1,45 @@
+---
+layout: default
+title: Home
+---
+
+<section>
+  <div class="filters" id="filters"></div>
+  <div id="feed"></div>
+</section>
+
+<script>
+async function load() {
+  const res = await fetch('/posts.json');
+  const posts = await res.json();
+  const feed = document.getElementById('feed');
+  const filters = document.getElementById('filters');
+
+  // collect categories
+  const cats = Array.from(new Set(posts.flatMap(p => p.categories || []))).sort();
+  const allBtn = document.createElement('button');
+  allBtn.textContent = 'All'; allBtn.onclick = () => render(posts);
+  filters.appendChild(allBtn);
+  cats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.textContent = c; btn.onclick = () => render(posts.filter(p => (p.categories || []).includes(c)));
+    filters.appendChild(btn);
+  });
+
+  function render(items) {
+    feed.innerHTML = '';
+    items.forEach(p => {
+      const div = document.createElement('div'); div.className = 'post';
+      div.innerHTML = `<h3><a href="${p.url}">${p.title}</a></h3><small>${p.date}</small><p>${p.excerpt || ''}</p>`;
+      feed.appendChild(div);
+    });
+  }
+
+  render(posts);
+}
+
+load().catch(err => {
+  console.error(err);
+  document.getElementById('feed').textContent = 'Failed to load posts.json';
+});
+</script>

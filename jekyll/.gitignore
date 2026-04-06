@@ -1,0 +1,14 @@
+# Ignore Obsidian and editor-specific files when editing the Jekyll site in-place
+.obsidian/
+# Obsidian workspace/system files
+.trash/
+.DS_Store
+# Jekyll build artifacts
+_site/
+.jekyll-cache/
+# Node / OS
+node_modules/
+# Backup files
+*~
+# Vim swap files
+.sw?
