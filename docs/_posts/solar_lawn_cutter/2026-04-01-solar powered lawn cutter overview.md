@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 2026-04-04 Solar Lawn Cutter
-date: 2026-04-05 12:00:00 +0000
+title: Solar Lawn Cutter Overview
+date: 2026-04-01 12:00:00 +0000
 ---
 
 ### Goal

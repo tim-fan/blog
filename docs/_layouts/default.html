@@ -172,6 +172,84 @@
       }
       .sort-btn:hover { color: var(--fg-muted); }
 
+      /* ── search page ── */
+      .search-input {
+        width: 100%;
+        font-size: 1rem;
+        font-family: inherit;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0.4rem 0;
+        margin-bottom: 2rem;
+        outline: none;
+        color: var(--fg);
+        background: transparent;
+      }
+      .search-input:focus { border-bottom-color: var(--accent); }
+      .search-result {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .search-result:last-child { border-bottom: none; }
+      .search-result h2 {
+        margin: 0 0 0.2rem;
+        font-size: 1.1rem;
+      }
+      .search-result h2 a { color: var(--fg); }
+      .search-result h2 a:hover { color: var(--accent); text-decoration: none; }
+      .search-snippet {
+        margin: 0.4rem 0 0;
+        font-size: 0.88rem;
+        color: var(--fg-muted);
+        line-height: 1.5;
+      }
+      .search-hint { color: var(--fg-subtle); font-size: 0.9rem; }
+      mark {
+        background: #fff3b0;
+        color: inherit;
+        border-radius: 2px;
+        padding: 0 1px;
+      }
+
+      /* ── index page ── */
+      .index-group {
+        margin-bottom: 2rem;
+      }
+      .index-heading {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fg-subtle);
+        margin: 0 0 0.5rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.3rem;
+      }
+      .index-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .index-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.92rem;
+      }
+      .index-list li:last-child { border-bottom: none; }
+      .index-list a { color: var(--fg); }
+      .index-list a:hover { color: var(--accent); text-decoration: none; }
+      .index-date {
+        font-size: 0.78rem;
+        color: var(--fg-subtle);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
       /* ── footer ── */
       .site-footer {
         border-top: 1px solid var(--border);
@@ -211,7 +289,9 @@
     </div>
 
     <footer class="site-footer">
-      <a href="https://github.com/tim-fan/blog">source</a>
+      <a href="{{ '/index-page.html' | relative_url }}">Index</a>
+      &middot;
+      <a href="{{ '/search.html' | relative_url }}">Search</a>
     </footer>
   </body>
 </html>

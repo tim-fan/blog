@@ -1,0 +1,46 @@
+---
+layout: default
+title: Index
+---
+
+<div id="post-index"></div>
+
+<script>
+(async () => {
+  const res = await fetch('{{ "/posts.json" | relative_url }}');
+  const posts = await res.json();
+  const container = document.getElementById('post-index');
+
+  // Group posts by category (or "Uncategorised")
+  const groups = {};
+  posts.forEach(p => {
+    const cats = p.categories && p.categories.length ? p.categories : ['uncategorised'];
+    cats.forEach(c => {
+      if (!groups[c]) groups[c] = [];
+      groups[c].push(p);
+    });
+  });
+
+  // Render each group as a section
+  Object.keys(groups).sort().forEach(cat => {
+    const section = document.createElement('section');
+    section.className = 'index-group';
+
+    const heading = document.createElement('h2');
+    heading.className = 'index-heading';
+    heading.textContent = cat.replace(/_/g, ' ');
+    section.appendChild(heading);
+
+    const ul = document.createElement('ul');
+    ul.className = 'index-list';
+    groups[cat].forEach(p => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="${p.url}">${p.title}</a><span class="index-date">${p.date}</span>`;
+      ul.appendChild(li);
+    });
+
+    section.appendChild(ul);
+    container.appendChild(section);
+  });
+})();
+</script>

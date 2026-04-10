@@ -1,0 +1,80 @@
+---
+layout: default
+title: Search
+---
+
+<input
+  id="search-input"
+  class="search-input"
+  type="search"
+  placeholder="Search posts…"
+  autofocus
+  autocomplete="off"
+/>
+
+<div id="search-results"></div>
+
+<script>
+(async () => {
+  const res = await fetch('{{ "/posts.json" | relative_url }}');
+  const posts = await res.json();
+  const input = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
+  }
+
+  function stripHtml(html) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    return d.textContent || '';
+  }
+
+  function render(query) {
+    const q = query.trim().toLowerCase();
+    results.innerHTML = '';
+
+    if (!q) {
+      results.innerHTML = '<p class="search-hint">Type to search across all posts.</p>';
+      return;
+    }
+
+    const matched = posts.filter(p => {
+      const haystack = (p.title + ' ' + stripHtml(p.content)).toLowerCase();
+      return haystack.includes(q);
+    });
+
+    if (!matched.length) {
+      results.innerHTML = '<p class="search-hint">No posts matched.</p>';
+      return;
+    }
+
+    matched.forEach(p => {
+      // find a snippet of plain text around the first match in content
+      const plain = stripHtml(p.content);
+      const idx = plain.toLowerCase().indexOf(q);
+      let snippet = '';
+      if (idx !== -1) {
+        const start = Math.max(0, idx - 80);
+        const end = Math.min(plain.length, idx + q.length + 120);
+        snippet = (start > 0 ? '…' : '') + plain.slice(start, end) + (end < plain.length ? '…' : '');
+      }
+
+      const article = document.createElement('article');
+      article.className = 'search-result';
+      article.innerHTML = `
+        <h2><a href="${p.url}">${highlight(p.title, query.trim())}</a></h2>
+        <div class="post-meta">${p.date}${p.categories && p.categories.length ? ' &middot; ' + p.categories.map(c => c.replace(/_/g, ' ')).join(', ') : ''}</div>
+        ${snippet ? `<p class="search-snippet">${highlight(snippet, query.trim())}</p>` : ''}
+      `;
+      results.appendChild(article);
+    });
+  }
+
+  render('');
+  input.addEventListener('input', e => render(e.target.value));
+})();
+</script>
