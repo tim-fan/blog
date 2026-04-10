@@ -10,6 +10,7 @@ What's in this repository
 - `spec.md` — project specification and implementation notes.
 - `docs/` — Jekyll site source; GitHub Pages publishes directly from this folder.
 - `scripts/embed_media` — Bash helper to upload images/videos to an S3-compatible endpoint (Cloudflare R2) and print Markdown/HTML embed markup.
+- `scripts/update_category_defaults` — Bash helper to sync `docs/_config.yml` category defaults from the `docs/_posts/` subdirectory structure.
 
 Key files in `docs/`
 - `_config.yml` — Jekyll configuration; `url` and `baseurl` are set for `tim-fan.github.io/blog`.
@@ -23,7 +24,7 @@ Publishing with GitHub Pages
 
 Quick start — run locally
 1. Install Ruby and Jekyll (if needed). See https://jekyllrb.com/docs/installation/.
-2. Add a `Gemfile` inside `docs/` if one is not already present (see below), then serve the site:
+2. Serve the site from the `docs/` folder:
 
 ```bash
 cd docs
@@ -35,7 +36,14 @@ Visit the local address printed by Jekyll (typically http://127.0.0.1:4000/blog/
 
 
 Post authoring
-- Add posts to `docs/_posts/` using the `YYYY-MM-DD-title.md` filename format and include YAML front matter with at least `title` and `date`. Subdirectories under `_posts/` are supported and are commonly used to group posts by project — Jekyll will derive categories from the path unless categories are set explicitly in front matter.
+- Add posts to `docs/_posts/` using the `YYYY-MM-DD-title.md` filename format and include YAML front matter with at least `title` and `date`. Subdirectories under `_posts/` are supported and used to group posts by project.
+- After adding a new project subdirectory, run the helper script to update category defaults in `_config.yml`:
+
+```bash
+./scripts/update_category_defaults
+```
+
+This crawls `docs/_posts/` for subdirectories and rewrites the `defaults:` block in `docs/_config.yml` so each subdirectory is automatically assigned as a category. Re-run it whenever you add a new project folder.
 
 Media uploads
 - Use `scripts/embed_media` to upload images and videos to Cloudflare R2 (S3-compatible). The script supports `--dry-run` and requires environment variables such as `R2_BUCKET` and `R2_ENDPOINT` when performing real uploads.

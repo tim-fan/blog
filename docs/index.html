@@ -3,43 +3,98 @@ layout: default
 title: Home
 ---
 
-<section>
-  <div class="filters" id="filters"></div>
-  <div id="feed"></div>
-</section>
+<div id="feed"></div>
 
 <script>
 async function load() {
   const res = await fetch('{{ "/posts.json" | relative_url }}');
-  const posts = await res.json();
+  const allPosts = await res.json();  // already newest-first from Jekyll
   const feed = document.getElementById('feed');
-  const filters = document.getElementById('filters');
+  const catNav = document.getElementById('cat-nav');
 
   // collect categories
-  const cats = Array.from(new Set(posts.flatMap(p => p.categories || []))).sort();
-  const allBtn = document.createElement('button');
-  allBtn.textContent = 'All'; allBtn.onclick = () => render(posts);
-  filters.appendChild(allBtn);
+  const cats = Array.from(new Set(allPosts.flatMap(p => p.categories || []))).sort();
+
+  let currentCat = null;
+  let newestFirst = true;
+
+  // ── sidebar: category links ──────────────────────────────
+  function setActiveLink(el) {
+    catNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  const allLink = document.createElement('a');
+  allLink.href = '#';
+  allLink.textContent = 'All posts';
+  allLink.classList.add('active');
+  allLink.onclick = e => { e.preventDefault(); currentCat = null; setActiveLink(allLink); renderCurrent(); };
+  catNav.appendChild(allLink);
+
   cats.forEach(c => {
-    const btn = document.createElement('button');
-    btn.textContent = c; btn.onclick = () => render(posts.filter(p => (p.categories || []).includes(c)));
-    filters.appendChild(btn);
+    const a = document.createElement('a');
+    a.href = '#';
+    a.textContent = c.replace(/_/g, ' ');
+    a.onclick = e => {
+      e.preventDefault();
+      currentCat = c;
+      setActiveLink(a);
+      renderCurrent();
+    };
+    catNav.appendChild(a);
   });
+
+  // ── sort toggle ──────────────────────────────────────────
+  const sortBar = document.createElement('div');
+  sortBar.className = 'sort-bar';
+
+  const sortLabel = document.createElement('span');
+  sortLabel.textContent = 'Sort: ';
+  sortBar.appendChild(sortLabel);
+
+  ['Newest first', 'Oldest first'].forEach((label, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.className = 'sort-btn' + (i === 0 ? ' active' : '');
+    btn.onclick = () => {
+      newestFirst = (i === 0);
+      sortBar.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCurrent();
+    };
+    sortBar.appendChild(btn);
+  });
+
+  feed.before(sortBar);
+
+  // ── render ───────────────────────────────────────────────
+  function renderCurrent() {
+    let items = currentCat
+      ? allPosts.filter(p => (p.categories || []).includes(currentCat))
+      : allPosts.slice();
+    if (!newestFirst) items = items.slice().reverse();
+    render(items);
+  }
 
   function render(items) {
     feed.innerHTML = '';
     items.forEach(p => {
-      const div = document.createElement('div'); div.className = 'post';
-      div.innerHTML = `<h3><a href="${p.url}">${p.title}</a></h3><small>${p.date}</small><p>${p.excerpt || ''}</p>`;
-      feed.appendChild(div);
+      const article = document.createElement('article');
+      article.className = 'post';
+      article.innerHTML = `
+        <h2><a href="${p.url}">${p.title}</a></h2>
+        <div class="post-meta">${p.date}${p.categories && p.categories.length ? ' &middot; ' + p.categories.map(c => c.replace(/_/g, ' ')).join(', ') : ''}</div>
+        <div class="post-content">${p.content}</div>
+      `;
+      feed.appendChild(article);
     });
   }
 
-  render(posts);
+  renderCurrent();
 }
 
 load().catch(err => {
   console.error(err);
-  document.getElementById('feed').textContent = 'Failed to load posts.json';
+  document.getElementById('feed').textContent = 'Failed to load posts.';
 });
 </script>

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# update_category_defaults
+#
+# Crawls docs/_posts/ for subdirectories and rewrites the `defaults:` block
+# in docs/_config.yml so each subdirectory is assigned as a category.
+#
+# Usage (from repo root):
+#   ./scripts/update_category_defaults
+#
+# Run this whenever you add a new project directory under docs/_posts/.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+POSTS_DIR="$REPO_ROOT/docs/_posts"
+CONFIG="$REPO_ROOT/docs/_config.yml"
+
+if [ ! -f "$CONFIG" ]; then
+  echo "Error: $CONFIG not found." >&2
+  exit 1
+fi
+
+# Collect subdirectory names (one level deep only — each is a project category)
+mapfile -t dirs < <(find "$POSTS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+
+if [ ${#dirs[@]} -eq 0 ]; then
+  echo "No subdirectories found in $POSTS_DIR — nothing to do."
+  exit 0
+fi
+
+# Build the new defaults block
+defaults_block="defaults:"
+for dir in "${dirs[@]}"; do
+  name="$(basename "$dir")"
+  defaults_block+="
+  - scope:
+      path: \"_posts/${name}\"
+      type: posts
+    values:
+      categories: [${name}]"
+done
+
+# Strip any existing defaults: block from _config.yml, then append the new one
+tmp=$(mktemp)
+# Remove everything from 'defaults:' to end of file, then write fresh block
+awk '/^defaults:/{found=1} !found{print}' "$CONFIG" > "$tmp"
+
+# Ensure there's a blank line before the new block
+echo "" >> "$tmp"
+echo "$defaults_block" >> "$tmp"
+
+mv "$tmp" "$CONFIG"
+
+echo "Updated $CONFIG with ${#dirs[@]} category default(s):"
+for dir in "${dirs[@]}"; do
+  echo "  - $(basename "$dir")"
+done

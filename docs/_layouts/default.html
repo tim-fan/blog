@@ -5,22 +5,213 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>{{ page.title | default: site.title }}</title>
     <style>
-      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; color: #111; }
-      header { margin-bottom: 1rem }
-      .post { border-bottom: 1px solid #eee; padding: 0.75rem 0 }
-      .filters { margin: 0.5rem 0 1rem }
-      .filters button { margin-right: 0.5rem }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      :root {
+        --fg: #1a1a1a;
+        --fg-muted: #777;
+        --fg-subtle: #aaa;
+        --bg: #fff;
+        --border: #e8e8e8;
+        --accent: #2a6ebb;
+        --sidebar-w: 200px;
+        --gap: 2.5rem;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+
+      /* ── site header ── */
+      .site-header {
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem var(--gap);
+      }
+      .site-header h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .site-header h1 a { color: var(--fg); }
+      .site-header h1 a:hover { text-decoration: none; color: var(--accent); }
+      .site-tagline {
+        margin: 0.15rem 0 0;
+        font-size: 0.82rem;
+        color: var(--fg-subtle);
+        font-style: italic;
+        letter-spacing: 0.01em;
+      }
+
+      /* ── page shell ── */
+      .page-shell {
+        display: flex;
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 0 var(--gap);
+        gap: var(--gap);
+      }
+
+      /* ── sidebar ── */
+      .sidebar {
+        flex: 0 0 var(--sidebar-w);
+        padding-top: 2rem;
+      }
+      .sidebar-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--fg-subtle);
+        margin-bottom: 0.6rem;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 0.2rem 0;
+        font-size: 0.88rem;
+        color: var(--fg-muted);
+        border-left: 2px solid transparent;
+        padding-left: 0.6rem;
+        transition: color 0.15s, border-color 0.15s;
+      }
+      .sidebar nav a:hover,
+      .sidebar nav a.active {
+        color: var(--fg);
+        border-left-color: var(--accent);
+        text-decoration: none;
+      }
+      .sidebar nav a.active { font-weight: 600; }
+
+      /* ── main content ── */
+      main {
+        flex: 1;
+        min-width: 0;
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+      }
+
+      /* ── posts (used by index) ── */
+      .post {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 2.5rem;
+        margin-bottom: 2.5rem;
+      }
+      .post:last-child { border-bottom: none; }
+      .post h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+      .post h2 a { color: var(--fg); }
+      .post h2 a:hover { color: var(--accent); text-decoration: none; }
+      .post-meta {
+        font-size: 0.8rem;
+        color: var(--fg-subtle);
+        margin-bottom: 1.1rem;
+      }
+      .post-content img,
+      .post-content video {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        margin: 0.5rem 0;
+      }
+      .post-content h1,
+      .post-content h2,
+      .post-content h3 { margin-top: 1.4rem; }
+      .post-content p { margin: 0.6rem 0; }
+      .post-content pre {
+        background: #f5f5f5;
+        border-radius: 4px;
+        padding: 0.8rem 1rem;
+        overflow-x: auto;
+        font-size: 0.88em;
+      }
+      .post-content code {
+        font-size: 0.88em;
+        background: #f5f5f5;
+        padding: 0.1em 0.3em;
+        border-radius: 3px;
+      }
+      .post-content pre code { background: none; padding: 0; }
+
+      /* ── sort bar ── */
+      .sort-bar {
+        font-size: 0.78rem;
+        color: var(--fg-subtle);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .sort-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        font-size: 0.78rem;
+        color: var(--fg-subtle);
+      }
+      .sort-btn + .sort-btn::before {
+        content: '·';
+        margin-right: 0.4rem;
+        color: var(--fg-subtle);
+      }
+      .sort-btn.active {
+        color: var(--fg-muted);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .sort-btn:hover { color: var(--fg-muted); }
+
+      /* ── footer ── */
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 1rem var(--gap);
+        font-size: 0.78rem;
+        color: var(--fg-subtle);
+        text-align: center;
+      }
+
+      /* ── responsive ── */
+      @media (max-width: 640px) {
+        :root { --gap: 1rem; }
+        .sidebar { display: none; }
+        .page-shell { flex-direction: column; }
+      }
     </style>
   </head>
   <body>
-    <header>
+    <header class="site-header">
       <h1><a href="{{ '/' | relative_url }}">{{ site.title }}</a></h1>
+      {% if site.description %}
+        <p class="site-tagline">{{ site.description }}</p>
+      {% endif %}
     </header>
-    <main>
-      {{ content }}
-    </main>
-    <footer>
-      <small>Generated by Jekyll — source in repo</small>
+
+    <div class="page-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-label">Projects</div>
+        <nav id="cat-nav">
+          <!-- populated by JS on index; static pages leave this empty -->
+        </nav>
+      </aside>
+
+      <main>
+        {{ content }}
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <a href="https://github.com/tim-fan/blog">source</a>
     </footer>
   </body>
 </html>

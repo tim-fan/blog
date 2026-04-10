@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <file> [--dry-run]" >&2
+  exit 1
+fi
+
+FILE="$1"
+DRY=0
+if [ "${2-}" = "--dry-run" ]; then DRY=1; fi
+
+if [ ! -f "$FILE" ]; then
+  echo "File not found: $FILE" >&2
+  exit 1
+fi
+
+mime=$(file --mime-type -b "$FILE")
+name=$(basename "$FILE")
+ts=$(date +%s)
+safe=$(echo "$name" | tr ' ' '_' | tr -cd '[:alnum:]._-' )
+dest="${ts}_${safe}"
+
+# Determine public domain. Preferred env var: R2_PUBLIC_DOMAIN. Fallback to bucket.r2.dev
+R2_PUBLIC_DOMAIN=${R2_PUBLIC_DOMAIN:-}
+if [ -z "$R2_PUBLIC_DOMAIN" ]; then
+  if [ -n "${R2_BUCKET:-}" ]; then
+    R2_PUBLIC_DOMAIN="${R2_BUCKET}.r2.dev"
+  else
+    R2_PUBLIC_DOMAIN="your-bucket.r2.dev"
+  fi
+fi
+
+# Upload using aws-cli if available and not dry-run
+if [ "$DRY" -eq 0 ]; then
+  if command -v aws >/dev/null 2>&1; then
+    if [ -z "${R2_BUCKET:-}" ]; then
+      echo "Please set R2_BUCKET and R2_ENDPOINT (or run with --dry-run)." >&2
+      exit 1
+    fi
+    AWS_PROFILE_OPT=( )
+    if [ -n "${AWS_PROFILE:-}" ]; then AWS_PROFILE_OPT=(--profile "$AWS_PROFILE"); fi
+    aws s3 cp "$FILE" "s3://${R2_BUCKET}/${dest}" --endpoint-url "${R2_ENDPOINT}" "${AWS_PROFILE_OPT[@]}"
+  else
+    echo "aws cli not found; run with --dry-run to see the embed output without uploading." >&2
+    exit 1
+  fi
+else
+  echo "DRY RUN: would upload $FILE to s3://${R2_BUCKET:-<bucket>}/${dest} via endpoint ${R2_ENDPOINT:-<endpoint>}" >&2
+fi
+
+url="https://${R2_PUBLIC_DOMAIN}/${dest}"
+
+if [[ "$mime" == image/* ]]; then
+  echo "![${safe}](${url})"
+elif [[ "$mime" == video/* ]]; then
+  # try to include a video tag with the correct mime type
+  echo "<video controls width=\"100%\"><source src=\"${url}\" type=\"${mime}\"></video>"
+else
+  echo "[${safe}](${url})"
+fi

@@ -36,11 +36,11 @@ A static site workflow leveraging a local editor (Obsidian) for authoring, an ob
 
 ### Phase 1: Repository & Basic Setup
 
-- [ ] Initialize a new GitHub repository and enable GitHub Pages (deploy from `main` branch or standard Jekyll configuration).
+- [x] Initialize a new GitHub repository and enable GitHub Pages (deploy from `main` branch or standard Jekyll configuration).
     
-- [ ] Scaffold a basic Jekyll directory structure (`_posts`, `_layouts`, `_site`, `_config.yml`).
+- [x] Scaffold a basic Jekyll directory structure (`_posts`, `_layouts`, `_site`, `_config.yml`).
     
-- [ ] Verify standard Markdown rendering works by creating a dummy post (`_posts/2026-04-05-test.md`) and checking the live URL.
+- [x] Verify standard Markdown rendering works by creating a dummy post (`_posts/2026-04-05-test.md`) and checking the live URL.
     
 
 ### Phase 2: Media Storage & Custom CLI Uploader
@@ -49,7 +49,7 @@ A static site workflow leveraging a local editor (Obsidian) for authoring, an ob
     
 - [ ] **Configure Local AWS CLI:** Install `aws-cli` and configure a dedicated profile with your R2 API tokens and the R2 S3-compatible endpoint URL.
     
-- [ ] **Write the `embed_media` Script:** Create an executable script (Bash or Python) that performs the following sequence:
+- [x] **Write the `embed_media` Script:** Create an executable script (Bash or Python) that performs the following sequence:
     
     1. **Accept Input:** Take the local file path as an argument `$1`.
         
@@ -67,26 +67,26 @@ A static site workflow leveraging a local editor (Obsidian) for authoring, an ob
             
         - If `video/*`: Print `<video controls width="100%"><source src="https://pub-abcdef123...r2.dev/filename.mp4" type="video/mp4"></video>`
             
-- [ ] **Test Script:** Ensure the script correctly uploads files, accurately outputs the formatted string to `stdout`, and that the resulting markup renders correctly in Obsidian's live preview.
+- [x] **Test Script:** Ensure the script correctly uploads files, accurately outputs the formatted string to `stdout`, and that the resulting markup renders correctly in Obsidian's live preview.
     
 
 ### Phase 3: The Dynamic Feed (Frontend)
 
-- [ ] **Generate JSON API:** Create `posts.json` in the Jekyll root directory using Liquid templating to iterate over `site.posts` and output an array of post metadata (title, URL, date, category, excerpt).
+- [x] **Generate JSON API:** Create `posts.json` in the Jekyll root using Liquid templating to iterate over `site.posts` and output an array of post data (title, URL, date, categories, full rendered content).
     
-- [ ] **Verify JSON Build:** Push to GitHub and verify `yoursite.com/posts.json` outputs valid, well-formed JSON.
+- [x] **Verify JSON Build:** Push to GitHub and verify `yoursite.com/posts.json` outputs valid, well-formed JSON.
     
-- [ ] **Build Index UI (`index.html`):**
+- [x] **Build Index UI (`index.html`):**
     
-    - [ ] Create an empty container for the feed.
+    - [x] Create an empty container for the feed.
         
-    - [ ] Add category/topic filter buttons at the top.
+    - [x] Add category/topic filter links in a sidebar (collapses on mobile).
         
-    - [ ] Write a Vanilla JS script to `fetch('./posts.json')`.
+    - [x] Write a Vanilla JS script to `fetch('./posts.json')`.
         
-    - [ ] Implement a render function to map the JSON array into DOM elements.
+    - [x] Implement a render function to map the JSON array into DOM elements, showing full post content inline.
         
-    - [ ] Add event listeners to the filter buttons to update the DOM based on the post category.
+    - [x] Add event listeners to the sidebar links to filter the feed by category.
         
     - [ ] _(Optional)_ Implement an `IntersectionObserver` on the last rendered item to build infinite scroll/pagination if the post volume requires it.
         
