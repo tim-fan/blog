@@ -17,6 +17,7 @@ lawn mower (cutter) that is solar powered, lives on the lawn, always cutting.
 *Cutting with scissors:* Aiming for efficiency, low noise, ability to cut relatively high grass. Seems impossibly slow, but if the robot is always cutting, does it need to cut fast??
 
 ### Inspiration
-![](https://youtu.be/nv2FbwjIZRE)
 
-![](https://youtu.be/wAMXnxXa3UU)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/nv2FbwjIZRE" frameborder="0" allowfullscreen>
+
+</iframe> <iframe width="560" height="315" src="https://www.youtube.com/embed/wAMXnxXa3UU" frameborder="0" allowfullscreen></iframe>

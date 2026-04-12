@@ -13,7 +13,7 @@ This worked in general, but in testing the rubber band extends a little, then th
 
 Video demo:
 
-<video controls width="100%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775925366_20260410_180611.mp4" type="video/mp4"></video>
+<video controls width="50%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775925366_20260410_180611.mp4" type="video/mp4"></video>
 
 
 [^1]: *relative* safety. I assume the scissors will still give a nasty cut, but at least the applied force is limited. Longer term I'll need some sort of shroud/guard.
