@@ -125,6 +125,11 @@
         margin: 0.5rem auto;
         display: block;
       }
+      .post-content iframe {
+        max-width: 100%;
+        display: block;
+        margin: 0.5rem auto;
+      }
       .post-content h1,
       .post-content h2,
       .post-content h3 { margin-top: 1.4rem; }
@@ -260,11 +265,54 @@
         text-align: center;
       }
 
+      /* ── mobile project filter ── */
+      .mobile-filter {
+        display: none;  /* shown only on mobile via media query above */
+        margin-bottom: 0.25rem;
+      }
+
       /* ── responsive ── */
       @media (max-width: 640px) {
         :root { --gap: 1rem; }
         .sidebar { display: none; }
-        .page-shell { flex-direction: column; }
+        .page-shell { flex-direction: column; gap: 0; }
+        .mobile-filter {
+          display: block;
+          width: 100%;
+        }
+      }
+      .mobile-filter summary {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fg-subtle);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .mobile-filter summary::-webkit-details-marker { display: none; }
+      .mobile-filter summary::after {
+        content: '▾';
+        font-size: 0.7rem;
+        transition: transform 0.15s;
+      }
+      .mobile-filter[open] summary::after { transform: rotate(-180deg); }
+      .mobile-filter nav a {
+        display: block;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+        color: var(--fg-muted);
+        border-bottom: 1px solid var(--border);
+      }
+      .mobile-filter nav a:last-child { border-bottom: none; }
+      .mobile-filter nav a.active {
+        color: var(--fg);
+        font-weight: 600;
       }
     </style>
   </head>
@@ -283,6 +331,11 @@
           <!-- populated by JS on index; static pages leave this empty -->
         </nav>
       </aside>
+
+      <details class="mobile-filter" id="mobile-filter">
+        <summary>Projects</summary>
+        <nav id="mobile-cat-nav"></nav>
+      </details>
 
       <main>
         {{ content }}

@@ -10,7 +10,8 @@ async function load() {
   const res = await fetch('{{ "/posts.json" | relative_url }}');
   const allPosts = await res.json();  // already newest-first from Jekyll
   const feed = document.getElementById('feed');
-  const catNav = document.getElementById('cat-nav');
+  const catNav       = document.getElementById('cat-nav');
+  const mobileCatNav = document.getElementById('mobile-cat-nav');
 
   // ── state (initialised from URL hash) ───────────────────
   function parseHash() {
@@ -31,49 +32,53 @@ async function load() {
 
   let state = parseHash();
 
-  // ── sidebar: category links ──────────────────────────────
+  // ── sidebar + mobile filter: category links ──────────────
   const cats = Array.from(new Set(allPosts.flatMap(p => p.categories || []))).sort();
 
-  function setActiveLink(el) {
-    catNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
+  function setActiveLinks(project) {
+    catNav.querySelectorAll('a').forEach(a => {
+      const matches = project
+        ? a.textContent === project.replace(/_/g, ' ')
+        : a.textContent === 'All posts';
+      a.classList.toggle('active', matches);
+    });
+    mobileCatNav.querySelectorAll('a').forEach(a => {
+      const matches = project
+        ? a.textContent === project.replace(/_/g, ' ')
+        : a.textContent === 'All posts';
+      a.classList.toggle('active', matches);
+    });
   }
 
-  const allLink = document.createElement('a');
-  allLink.href = '#';
-  allLink.textContent = 'All posts';
-  allLink.onclick = e => {
-    e.preventDefault();
-    state = { ...state, project: null };
-    setHash(state);
-    setActiveLink(allLink);
-    renderCurrent();
-  };
-  catNav.appendChild(allLink);
-
-  cats.forEach(c => {
+  function makeLink(label, project, nav) {
     const a = document.createElement('a');
     a.href = '#';
-    a.textContent = c.replace(/_/g, ' ');
+    a.textContent = label;
     a.onclick = e => {
       e.preventDefault();
-      state = { ...state, project: c };
+      state = { ...state, project };
       setHash(state);
-      setActiveLink(a);
+      setActiveLinks(project);
+      if (document.getElementById('mobile-filter').open) {
+        document.getElementById('mobile-filter').open = false;
+      }
       renderCurrent();
     };
-    catNav.appendChild(a);
+    nav.appendChild(a);
+    return a;
+  }
+
+  makeLink('All posts', null, catNav);
+  makeLink('All posts', null, mobileCatNav);
+
+  cats.forEach(c => {
+    const label = c.replace(/_/g, ' ');
+    makeLink(label, c, catNav);
+    makeLink(label, c, mobileCatNav);
   });
 
-  // set initial active sidebar link
-  if (state.project) {
-    const match = [...catNav.querySelectorAll('a')].find(a =>
-      a.textContent === state.project.replace(/_/g, ' '));
-    if (match) match.classList.add('active');
-    else allLink.classList.add('active');
-  } else {
-    allLink.classList.add('active');
-  }
+  // set initial active link
+  setActiveLinks(state.project);
 
   // ── sort toggle ──────────────────────────────────────────
   const sortBar = document.createElement('div');
@@ -120,14 +125,7 @@ async function load() {
   // re-apply state if hash changes (browser back/forward)
   window.addEventListener('hashchange', () => {
     state = parseHash();
-    // sync sidebar
-    if (state.project) {
-      const match = [...catNav.querySelectorAll('a')].find(a =>
-        a.textContent === state.project.replace(/_/g, ' '));
-      setActiveLink(match || allLink);
-    } else {
-      setActiveLink(allLink);
-    }
+    setActiveLinks(state.project);
     // sync sort buttons
     sortBar.querySelectorAll('.sort-btn').forEach(btn => {
       btn.classList.toggle('active',
