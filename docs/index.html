@@ -12,13 +12,28 @@ async function load() {
   const feed = document.getElementById('feed');
   const catNav = document.getElementById('cat-nav');
 
-  // collect categories
-  const cats = Array.from(new Set(allPosts.flatMap(p => p.categories || []))).sort();
+  // ── state (initialised from URL hash) ───────────────────
+  function parseHash() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    return {
+      project: params.get('project') || null,
+      sort:    params.get('sort') === 'oldest' ? 'oldest' : 'newest',
+    };
+  }
 
-  let currentCat = null;
-  let newestFirst = true;
+  function setHash(state) {
+    const params = new URLSearchParams();
+    if (state.project) params.set('project', state.project);
+    if (state.sort === 'oldest') params.set('sort', 'oldest');
+    const str = params.toString();
+    history.replaceState(null, '', str ? '#' + str : window.location.pathname + window.location.search);
+  }
+
+  let state = parseHash();
 
   // ── sidebar: category links ──────────────────────────────
+  const cats = Array.from(new Set(allPosts.flatMap(p => p.categories || []))).sort();
+
   function setActiveLink(el) {
     catNav.querySelectorAll('a').forEach(a => a.classList.remove('active'));
     el.classList.add('active');
@@ -27,8 +42,13 @@ async function load() {
   const allLink = document.createElement('a');
   allLink.href = '#';
   allLink.textContent = 'All posts';
-  allLink.classList.add('active');
-  allLink.onclick = e => { e.preventDefault(); currentCat = null; setActiveLink(allLink); renderCurrent(); };
+  allLink.onclick = e => {
+    e.preventDefault();
+    state = { ...state, project: null };
+    setHash(state);
+    setActiveLink(allLink);
+    renderCurrent();
+  };
   catNav.appendChild(allLink);
 
   cats.forEach(c => {
@@ -37,27 +57,36 @@ async function load() {
     a.textContent = c.replace(/_/g, ' ');
     a.onclick = e => {
       e.preventDefault();
-      currentCat = c;
+      state = { ...state, project: c };
+      setHash(state);
       setActiveLink(a);
       renderCurrent();
     };
     catNav.appendChild(a);
   });
 
+  // set initial active sidebar link
+  if (state.project) {
+    const match = [...catNav.querySelectorAll('a')].find(a =>
+      a.textContent === state.project.replace(/_/g, ' '));
+    if (match) match.classList.add('active');
+    else allLink.classList.add('active');
+  } else {
+    allLink.classList.add('active');
+  }
+
   // ── sort toggle ──────────────────────────────────────────
   const sortBar = document.createElement('div');
   sortBar.className = 'sort-bar';
+  sortBar.appendChild(Object.assign(document.createElement('span'), { textContent: 'Sort: ' }));
 
-  const sortLabel = document.createElement('span');
-  sortLabel.textContent = 'Sort: ';
-  sortBar.appendChild(sortLabel);
-
-  ['Newest first', 'Oldest first'].forEach((label, i) => {
+  ['newest', 'oldest'].forEach((val, i) => {
     const btn = document.createElement('button');
-    btn.textContent = label;
-    btn.className = 'sort-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = val === 'newest' ? 'Newest first' : 'Oldest first';
+    btn.className = 'sort-btn' + (state.sort === val ? ' active' : '');
     btn.onclick = () => {
-      newestFirst = (i === 0);
+      state = { ...state, sort: val };
+      setHash(state);
       sortBar.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderCurrent();
@@ -69,15 +98,13 @@ async function load() {
 
   // ── render ───────────────────────────────────────────────
   function renderCurrent() {
-    let items = currentCat
-      ? allPosts.filter(p => (p.categories || []).includes(currentCat))
+    let items = state.project
+      ? allPosts.filter(p => (p.categories || []).includes(state.project))
       : allPosts.slice();
-    if (!newestFirst) items = items.slice().reverse();
-    render(items);
-  }
+    if (state.sort === 'oldest') items = items.slice().reverse();
 
-  function render(items) {
     feed.innerHTML = '';
+
     items.forEach(p => {
       const article = document.createElement('article');
       article.className = 'post';
@@ -89,6 +116,26 @@ async function load() {
       feed.appendChild(article);
     });
   }
+
+  // re-apply state if hash changes (browser back/forward)
+  window.addEventListener('hashchange', () => {
+    state = parseHash();
+    // sync sidebar
+    if (state.project) {
+      const match = [...catNav.querySelectorAll('a')].find(a =>
+        a.textContent === state.project.replace(/_/g, ' '));
+      setActiveLink(match || allLink);
+    } else {
+      setActiveLink(allLink);
+    }
+    // sync sort buttons
+    sortBar.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.classList.toggle('active',
+        (btn.textContent === 'Newest first' && state.sort === 'newest') ||
+        (btn.textContent === 'Oldest first' && state.sort === 'oldest'));
+    });
+    renderCurrent();
+  });
 
   renderCurrent();
 }
