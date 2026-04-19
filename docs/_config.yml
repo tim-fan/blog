@@ -5,12 +5,18 @@ url: "https://tim-fan.github.io"
 markdown: kramdown
 
 
+
 defaults:
   - scope:
       path: "_posts/chalk_line_follower"
       type: posts
     values:
       categories: [chalk_line_follower]
+  - scope:
+      path: "_posts/festivity_maps"
+      type: posts
+    values:
+      categories: [festivity_maps]
   - scope:
       path: "_posts/solar_lawn_cutter"
       type: posts
