@@ -347,5 +347,18 @@
       &middot;
       <a href="{{ '/search.html' | relative_url }}">Search</a>
     </footer>
+
+    <script>
+      // Pause other videos when one starts playing
+      document.addEventListener('play', function(e) {
+        if (e.target.tagName === 'VIDEO') {
+          document.querySelectorAll('video').forEach(function(video) {
+            if (video !== e.target && !video.paused) {
+              video.pause();
+            }
+          });
+        }
+      }, true);
+    </script>
   </body>
 </html>
