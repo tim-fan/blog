@@ -48,6 +48,6 @@ Result is a high-res live stream of the book that can be zoomed/panned on the vi
 
 ## Conclusions
 
-I'll user-test idea 2 for feedback. If it works well I could think about packaging it conveniently, avoiding the steps of setting up a VDO.ninja room and editing links etc.
+I'll user-test idea 2 for feedback. If it works well I'd think about packaging it conveniently, avoiding the steps of setting up a VDO.ninja room and editing links etc.
 
 I'm also tempted to develop the finger tracking idea further, a next step would be to try it as an android app leveraging built in APIs for [hand tracking](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/android) and [text detection](https://developers.google.com/ml-kit/vision/text-recognition/v2/android).
