@@ -11,8 +11,24 @@ layout: default
   <div class="post-body">
     {{ content }}
   </div>
-
-  <aside class="post-sidebar">
-    <!-- Placeholder for sidebar content: related posts, project links, etc. -->
-  </aside>
 </article>
+
+<nav class="post-nav">
+  {% if page.categories.size > 0 %}
+    {% assign cat = page.categories.first %}
+    <a href="{{ '/' | relative_url }}#project={{ cat }}">↑ {{ cat | replace: '_', ' ' | capitalize }}</a>
+    <span class="post-nav-sep">&middot;</span>
+  {% endif %}
+  <a href="{{ '/' | relative_url }}">Home</a>
+</nav>
+
+<script>
+  // Hide the projects sidebar — it's empty on post pages
+  var sidebar = document.getElementById('sidebar');
+  var mobileFilter = document.getElementById('mobile-filter');
+  if (sidebar) sidebar.style.display = 'none';
+  if (mobileFilter) mobileFilter.style.display = 'none';
+  // Replace the footer with post-nav links
+  var footer = document.querySelector('.site-footer');
+  if (footer) footer.style.display = 'none';
+</script>
