@@ -2,7 +2,7 @@
 
 Goal for this project is to make it easier for kids to read to grandparents over a video call. 
 
-<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1777864369_Gemini_Generated_Image_v3wkzsv3wkzsv3wk.jpg" width="50%" alt="Gemini generated - grandparent teaching child to read, style of Monet"/>
+<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1777864369_Gemini_Generated_Image_v3wkzsv3wkzsv3wk.jpg" width="50%" alt="Gemini generated - grandparent teaching child to read, style of Monet" title="Gemini generated - grandparent teaching child to read, style of Monet"/>
 
 Kids should be able to share the book they are reading over the call, and grandparents should be able to follow along
 
