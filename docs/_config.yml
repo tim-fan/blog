@@ -7,12 +7,18 @@ markdown: kramdown
 
 
 
+
 defaults:
   - scope:
       path: "_posts/chalk_line_follower"
       type: posts
     values:
       categories: [chalk_line_follower]
+  - scope:
+      path: "_posts/dig_through"
+      type: posts
+    values:
+      categories: [dig_through]
   - scope:
       path: "_posts/festivity_maps"
       type: posts
