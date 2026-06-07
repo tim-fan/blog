@@ -18,6 +18,7 @@ Uses WebXR + your geolocation to display a virtual hole dug into the earth, to s
 
 ### You can try it too 👇
 It's browser based, you can try it on your phone:
+
 https://tim-fan.github.io/dig-through
 
 You'll need to grant location permissions for it to work.
@@ -26,7 +27,8 @@ You'll need to grant location permissions for it to work.
 
 This was a concept I tried a couple years ago but didn't complete. Now I've tried again with the power of AI. This was mostly coded on my phone with claude while I was on the train. Still needs clean up but it mostly works to show the concept. 
 
-Code is here
+Code is here:
+
 https://github.com/tim-fan/dig-through/tree/main
 
 ### ToDo items
