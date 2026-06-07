@@ -19,7 +19,7 @@ Uses WebXR + your geolocation to display a virtual hole dug into the earth, to s
 ### You can try it too 👇
 It's browser based, you can try it on your phone:
 
-https://tim-fan.github.io/dig-through
+[https://tim-fan.github.io/dig-through](https://tim-fan.github.io/dig-through)
 
 You'll need to grant location permissions for it to work.
 
@@ -29,7 +29,7 @@ This was a concept I tried a couple years ago but didn't complete. Now I've trie
 
 Code is here:
 
-https://github.com/tim-fan/dig-through/tree/main
+[https://github.com/tim-fan/dig-through/tree/main](https://github.com/tim-fan/dig-through/tree/main)
 
 ### ToDo items
 * Confirm accuracy - the direction to New Zealand is roughly as I expect, but should be more methodically tested
