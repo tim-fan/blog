@@ -11,17 +11,19 @@ Presenting: 🌍 **Dig Through!** 🪏
 Uses WebXR + your geolocation to display a virtual hole dug into the earth, to show what's on the other side.
 
 <figure>
-<video controls width="50%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1780864306_Screen_Recording_20260607_125729_Chrome.mp4" type="video/mp4" ></video>
+<video controls width="70%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1780864306_Screen_Recording_20260607_125729_Chrome.mp4" type="video/mp4" ></video>
 <figcaption> Demo video, digging through the earth to find New Zealand
 </figcaption>
 </figure>
 
 ### You can try it too 👇
-It's browser based, you can try it on your phone:
+It's browser based, you can try it on your phone  (Android only):
 
 [https://tim-fan.github.io/dig-through](https://tim-fan.github.io/dig-through)
 
 You'll need to grant location permissions for it to work.
+
+Apologies iPhone users - it seems there's [no support for WebXR on iOS at this time](https://stackoverflow.com/questions/77091785/is-the-webxr-api-available-on-mobile-ios-browsers-or-not).
 
 ### Details
 
