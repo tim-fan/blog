@@ -19,7 +19,18 @@ async function load() {
     return {
       project: params.get('project') || null,
       sort:    params.get('sort') === 'oldest' ? 'oldest' : 'newest',
+      post:    params.get('post') || null,
     };
+  }
+
+  // Stable, unique slug for a post, derived from its URL path.
+  function slugFor(url) {
+    let path;
+    try { path = new URL(url, location.href).pathname; }
+    catch { return ''; }
+    const base = location.pathname.replace(/[^/]*$/, '');  // e.g. "/blog/"
+    if (path.startsWith(base)) path = path.slice(base.length);
+    return path.replace(/\.html?$/, '').replace(/^\/+|\/+$/g, '').replace(/\//g, '-');
   }
 
   function setHash(state) {
@@ -101,6 +112,121 @@ async function load() {
 
   feed.before(sortBar);
 
+  // ── tall-post clamp ──────────────────────────────────────
+  // Posts taller than this many viewport heights get collapsed
+  // in the feed behind a "Show more" toggle.
+  const CLAMP_RATIO = 1.5;
+  let clampers = [];  // re-evaluated on resize
+
+  function setupClamp(article, content) {
+    let userToggled = false;  // once the reader expands/collapses, stop auto-clamping
+    let btn = null;
+
+    function threshold() { return window.innerHeight * CLAMP_RATIO; }
+
+    function evaluate() {
+      if (userToggled) return;
+      const limit = threshold();
+      // measure natural height (clamp temporarily removed)
+      const wasClamped = content.classList.contains('is-clamped');
+      content.classList.remove('is-clamped');
+      content.style.maxHeight = '';
+      const tall = content.scrollHeight > limit + 24;  // small buffer
+
+      if (tall) {
+        content.classList.add('is-clamped');
+        content.style.maxHeight = limit + 'px';
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.className = 'expand-btn';
+          btn.textContent = 'Show more';
+          btn.onclick = () => {
+            userToggled = true;
+            if (content.classList.contains('is-clamped')) {
+              content.classList.remove('is-clamped');
+              content.style.maxHeight = '';
+              btn.textContent = 'Show less';
+            } else {
+              content.classList.add('is-clamped');
+              content.style.maxHeight = threshold() + 'px';
+              btn.textContent = 'Show more';
+              article.scrollIntoView({ block: 'nearest' });
+            }
+          };
+          content.after(btn);
+        }
+      } else if (btn) {
+        // grew shorter (rare) — drop the control
+        btn.remove();
+        btn = null;
+      } else if (wasClamped) {
+        content.classList.remove('is-clamped');
+        content.style.maxHeight = '';
+      }
+    }
+
+    evaluate();
+    // media loads after HTML is injected and changes height — re-measure
+    content.querySelectorAll('img, video, iframe').forEach(el => {
+      el.addEventListener('load', evaluate);
+      el.addEventListener('loadedmetadata', evaluate);
+    });
+    clampers.push(evaluate);
+  }
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => clampers.forEach(fn => fn()), 150);
+  });
+
+  // ── jump to a post in the feed (robust against late layout) ──
+  // The feed renders async and media loads even later, so the target's
+  // position keeps moving. Rather than scroll once, we keep the target
+  // pinned to the top as things settle — and back off the instant the
+  // reader takes over (scroll / tap / arrow keys).
+  let cancelActiveJump = null;
+  function scrollToPost(slug) {
+    const el = document.getElementById('post-' + slug);
+    if (!el) return;
+    if (cancelActiveJump) cancelActiveJump();  // supersede any in-flight jump
+
+    let cancelled = false;
+    const align = () => { if (!cancelled) el.scrollIntoView({ block: 'start' }); };
+    const cancel = () => {
+      if (cancelled) return;
+      cancelled = true;
+      window.removeEventListener('wheel', cancel);
+      window.removeEventListener('pointerdown', cancel);
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('load', onLoad, true);
+      clearInterval(timer);
+      cancelActiveJump = null;
+    };
+    const onKey = e => {
+      if (['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' ','Spacebar'].includes(e.key)) cancel();
+    };
+    const onLoad = e => {
+      const t = e.target.tagName;
+      if (t === 'IMG' || t === 'VIDEO' || t === 'IFRAME') align();
+    };
+    window.addEventListener('wheel', cancel, { passive: true });
+    window.addEventListener('pointerdown', cancel, { passive: true });
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('load', onLoad, true);  // media load doesn't bubble
+    cancelActiveJump = cancel;
+
+    // restart the landing flash
+    el.classList.remove('post-target');
+    void el.offsetWidth;
+    el.classList.add('post-target');
+
+    align();
+    // keep re-aligning for a few seconds while media / clamps settle
+    let ticks = 0;
+    const timer = setInterval(() => { align(); if (++ticks >= 30) cancel(); }, 100);
+  }
+
   // ── render ───────────────────────────────────────────────
   function renderCurrent() {
     let items = state.project
@@ -109,16 +235,32 @@ async function load() {
     if (state.sort === 'oldest') items = items.slice().reverse();
 
     feed.innerHTML = '';
+    clampers = [];
 
     items.forEach(p => {
+      const slug = slugFor(p.url);
       const article = document.createElement('article');
       article.className = 'post';
+      article.id = 'post-' + slug;
       article.innerHTML = `
         <h2><a href="${p.url}">${p.title}</a></h2>
-        <div class="post-meta">${p.date}${p.categories && p.categories.length ? ' &middot; ' + p.categories.map(c => c.replace(/_/g, ' ')).join(', ') : ''}</div>
+        <div class="post-meta">${p.date}${p.categories && p.categories.length ? ' &middot; ' + p.categories.map(c => c.replace(/_/g, ' ')).join(', ') : ''}<a class="post-permalink" href="#post=${slug}" title="Copy link to this post" aria-label="Copy link to this post">#</a></div>
         <div class="post-content">${p.content}</div>
       `;
       feed.appendChild(article);
+      setupClamp(article, article.querySelector('.post-content'));
+
+      // permalink: copy the shareable URL without a disorienting re-scroll
+      const link = article.querySelector('.post-permalink');
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const url = location.origin + location.pathname + '#post=' + slug;
+        history.replaceState(null, '', '#post=' + slug);
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+        link.classList.add('copied');
+        link.textContent = 'copied';
+        setTimeout(() => { link.classList.remove('copied'); link.textContent = '#'; }, 1200);
+      });
     });
   }
 
@@ -133,9 +275,11 @@ async function load() {
         (btn.textContent === 'Oldest first' && state.sort === 'oldest'));
     });
     renderCurrent();
+    if (state.post) scrollToPost(state.post);
   });
 
   renderCurrent();
+  if (state.post) scrollToPost(state.post);
 }
 
 load().catch(err => {

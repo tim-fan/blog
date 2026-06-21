@@ -38,6 +38,5 @@ Code is here:
 * Nicer effects, show a little spade digging the hole, sound effects, better textures
 * Select satellite or map view
 * User flow improvements - graceful error handling, graceful handling of location permission denial, etc
-* Should earth model be made much larger? Or scale is negligible?
 
 Obligatory mention to Google's [Floom experiment](https://experiments.withgoogle.com/floom) - that is also a webxr app for seeing through the earth, I just changed the projection approach so you can see full countries and interact by walking around the portal.
