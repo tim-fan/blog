@@ -65,11 +65,11 @@ Following [official dinov3 examples](https://github.com/facebookresearch/dinov3/
 Synthetic data was produced with a combo of linkedin photos of the plane, nano banana to produce top-down views, and gimp to place it in the desert nadir frames.
 
 This gives us target embeddings we can use to train a classifier, to search for similar patches in the dataset.
-<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782077227_plane_detection_concept.png" alt="Plane detection concept" style="aspect-ratio: 1408 / 768"> 
+<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782077227_plane_detection_concept.png" alt="Plane detection concept" width="100%" style="aspect-ratio: 1408 / 768"> 
 </figure>
 
 10 synthetic images + labels were created. One example:
-<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782005900_Screenshot_from_2026-06-20_18-37-44.png" alt="Example synthetic image" style="aspect-ratio: 1015 / 773"> <figcaption>Example synthetic image</figcaption> </figure>
+<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782005900_Screenshot_from_2026-06-20_18-37-44.png" alt="Example synthetic image" width="100%" style="aspect-ratio: 1015 / 773"> <figcaption>Example synthetic image</figcaption> </figure>
 
 **Result:** First pass, this was good at detecting dark triangular patches, however the vast majority were shadows.
 
@@ -105,7 +105,7 @@ After implementing and testing the above, OP confirmed the plane was not in the 
 [The plane was found by OP outside the originally scanned area](https://www.reddit.com/r/computervision/comments/1ubtjan/update_plane_has_been_found/). Kindly the additional scan dataset of 856 images (one of which is confirmed to contain the plane) was provided. This allows those of us working on the problem to test our algorithms. 
 
 The new dataset does contain metadata, so we can see the search area:
-<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782071719_Screenshot_from_2026-06-21_12-44-08.png" alt="Extended search space" style="aspect-ratio: 1235 / 843"> <figcaption>Extended search space</figcaption> </figure>
+<figure> <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1782071719_Screenshot_from_2026-06-21_12-44-08.png" alt="Extended search space" width="100%" style="aspect-ratio: 1235 / 843"> <figcaption>Extended search space</figcaption> </figure>
 
 Extrapolating area per image, I estimate the total search space (original dataset + extended) was around 81M ft², almost 3 square miles.
 
