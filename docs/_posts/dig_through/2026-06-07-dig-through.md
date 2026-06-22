@@ -11,7 +11,7 @@ Presenting: 🌍 **Dig Through!** 🪏
 Uses WebXR + your geolocation to display a virtual hole dug into the earth, to show what's on the other side.
 
 <figure>
-<video controls width="70%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1780864306_Screen_Recording_20260607_125729_Chrome.mp4" type="video/mp4" ></video>
+<video controls width="70%" style="aspect-ratio: 1080 / 2340"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1780864306_Screen_Recording_20260607_125729_Chrome.mp4" type="video/mp4" ></video>
 <figcaption> Demo video, digging through the earth to find New Zealand
 </figcaption>
 </figure>

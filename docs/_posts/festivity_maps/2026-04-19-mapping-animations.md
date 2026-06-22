@@ -12,7 +12,7 @@ TODO: add a project overview post to this blog for more context.
 
 Shows the 2025 map being built over time, along the actual driven trajectory, highlighting most festive houses.
 
-<video controls width="100%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1776622165_vokoscreenNG-2026-04-18_18-04-27.mp4" type="video/mp4"></video>
+<video controls width="100%" style="aspect-ratio: 1458 / 916"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1776622165_vokoscreenNG-2026-04-18_18-04-27.mp4" type="video/mp4"></video>
 
 Trajectory statistics:
 ```
@@ -25,4 +25,4 @@ Trajectory statistics:
 
 ### Interactive browsing final map 
 
-<video controls width="100%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1776621702_vokoscreenNG-2026-04-18_18-10-39.mp4" type="video/mp4"></video>
+<video controls width="100%" style="aspect-ratio: 1444 / 782"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1776621702_vokoscreenNG-2026-04-18_18-10-39.mp4" type="video/mp4"></video>

@@ -18,4 +18,4 @@ Areas for optimization:
 * local sensing of long grass 
 * faster cutting (while maintaining low noise)
 
-![20250411_145228.jpg](https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775797846_20250411_145228.jpg)
+![20250411_145228.jpg](https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775797846_20250411_145228.jpg){: style="aspect-ratio: 1324 / 993"}

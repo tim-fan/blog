@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+"""measure_media — give every post's media a known size so the feed can't jump.
+
+Scans docs/_posts for media URLs (images and videos), measures each one's
+natural pixel width/height, and bakes a CSS ``aspect-ratio`` straight into the
+corresponding <img>/<video>/markdown-image in the source. Because the size now
+lives in the static HTML, the browser reserves the right amount of space before
+the media loads — so neither the feed nor the dedicated post pages reflow
+("jump") as media streams in, and no client-side JavaScript is involved.
+
+Measurements are cached in media_sizes.json (repo root): a URL already in the
+cache is never re-fetched, so normal commits do no network I/O — only newly
+added media is fetched. Baking is idempotent: a tag that already carries an
+``aspect-ratio`` is left untouched. Cache entries for media no longer
+referenced anywhere are pruned.
+
+Usage:
+    scripts/measure_media            # measure new media + bake sizes into source
+    scripts/measure_media --check    # exit non-zero if anything is unmeasured or
+                                     # unbaked (no network); useful in CI
+
+Requires: Pillow (images) and ffprobe (videos) on PATH.
+"""
+
+import io
+import json
+import os
+import re
+import subprocess
+import sys
+import urllib.request
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+POSTS_DIR = os.path.join(REPO_ROOT, "docs", "_posts")
+CACHE_PATH = os.path.join(REPO_ROOT, "media_sizes.json")
+
+IMAGE_EXTS = {"png", "jpg", "jpeg", "gif", "webp", "avif", "bmp"}
+VIDEO_EXTS = {"mp4", "mov", "webm", "m4v", "ogv", "ogg"}
+
+URL_RE = re.compile(
+    r"https?://[^\s\"')]+?\.(" + "|".join(IMAGE_EXTS | VIDEO_EXTS) + r")\b",
+    re.IGNORECASE,
+)
+
+
+def post_files():
+    for root, _dirs, files in os.walk(POSTS_DIR):
+        for name in files:
+            if name.endswith((".md", ".markdown", ".html")):
+                yield os.path.join(root, name)
+
+
+def find_media_urls():
+    urls = set()
+    for path in post_files():
+        with open(path, encoding="utf-8") as fh:
+            for m in URL_RE.finditer(fh.read()):
+                urls.add(m.group(0))
+    return urls
+
+
+# Some CDNs (Cloudflare R2 public buckets included) reject the default
+# urllib User-Agent, so present a browser-like one.
+UA = "Mozilla/5.0 (X11; Linux x86_64) measure_media/1.0"
+
+
+def measure_image(url):
+    from PIL import Image
+
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = resp.read()
+    with Image.open(io.BytesIO(data)) as im:
+        return [im.width, im.height]
+
+
+def measure_video(url):
+    out = subprocess.check_output(
+        [
+            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            "-show_streams", "-of", "json", url,
+        ],
+        timeout=120,
+    )
+    stream = json.loads(out)["streams"][0]
+    w, h = int(stream["width"]), int(stream["height"])
+
+    # honour rotation metadata so portrait phone clips report portrait dims
+    rotation = 0
+    try:
+        rotation = int(stream.get("tags", {}).get("rotate", 0))
+    except (TypeError, ValueError):
+        pass
+    for sd in stream.get("side_data_list", []):
+        if "rotation" in sd:
+            try:
+                rotation = int(sd["rotation"])
+            except (TypeError, ValueError):
+                pass
+    if abs(rotation) % 180 == 90:
+        w, h = h, w
+    return [w, h]
+
+
+def ext_of(url):
+    return url.rsplit(".", 1)[-1].split("?", 1)[0].lower()
+
+
+# ── baking aspect-ratio into the source HTML ────────────────────────────────
+HAS_ASPECT = re.compile(r"aspect-ratio", re.IGNORECASE)
+STYLE_ATTR = re.compile(r"""style\s*=\s*(["'])(.*?)\1""", re.IGNORECASE | re.DOTALL)
+SRC_ATTR = re.compile(r"""src\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+IMG_TAG = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
+VIDEO_BLOCK = re.compile(r"<video\b[^>]*>", re.IGNORECASE)
+# markdown image, optionally followed by a kramdown IAL: ![alt](url){: ...}
+MD_IMAGE = re.compile(r"!\[[^\]]*\]\(\s*(?P<url>[^)\s]+)[^)]*\)(?P<ial>\{:[^}]*\})?")
+
+
+def add_aspect_to_tag(tag, w, h):
+    """Return ``tag`` with an aspect-ratio added, or None if it already has one."""
+    if HAS_ASPECT.search(tag):
+        return None
+    ratio = f"aspect-ratio: {w} / {h}"
+    m = STYLE_ATTR.search(tag)
+    if m:
+        existing = m.group(2).strip().rstrip(";")
+        merged = f"{existing}; {ratio}" if existing else ratio
+        return tag[: m.start()] + f'style="{merged}"' + tag[m.end() :]
+    if tag.rstrip().endswith("/>"):
+        return re.sub(r"\s*/>\s*$", f' style="{ratio}" />', tag)
+    return re.sub(r"\s*>\s*$", f' style="{ratio}">', tag)
+
+
+def bake_text(text, cache):
+    """Add aspect-ratio to every img/video/markdown-image with a known size."""
+    changed = 0
+
+    def repl_img(m):
+        nonlocal changed
+        tag = m.group(0)
+        src = SRC_ATTR.search(tag)
+        dim = cache.get(src.group(1)) if src else None
+        if dim:
+            new = add_aspect_to_tag(tag, dim[0], dim[1])
+            if new:
+                changed += 1
+                return new
+        return tag
+
+    def repl_video(m):
+        nonlocal changed
+        open_tag = m.group(0)
+        # the <source> follows the opening tag; find the first src after it
+        rest = text[m.end() : m.end() + 600]
+        src = SRC_ATTR.search(rest)
+        dim = cache.get(src.group(1)) if src else None
+        if dim:
+            new = add_aspect_to_tag(open_tag, dim[0], dim[1])
+            if new:
+                changed += 1
+                return new
+        return open_tag
+
+    def repl_md(m):
+        nonlocal changed
+        dim = cache.get(m.group("url"))
+        if not dim:
+            return m.group(0)
+        ial = m.group("ial")
+        if ial and HAS_ASPECT.search(ial):
+            return m.group(0)
+        ratio = f'aspect-ratio: {dim[0]} / {dim[1]}'
+        img = m.group(0)[: m.start("ial") - m.start()] if ial else m.group(0)
+        if ial:
+            new_ial = ial[:-1].rstrip() + f' style="{ratio}"}}'
+            changed += 1
+            return img + new_ial
+        changed += 1
+        return img + f'{{: style="{ratio}"}}'
+
+    text = IMG_TAG.sub(repl_img, text)
+    text = VIDEO_BLOCK.sub(repl_video, text)
+    text = MD_IMAGE.sub(repl_md, text)
+    return text, changed
+
+
+def bake_sources(cache):
+    total = 0
+    files = 0
+    for path in post_files():
+        with open(path, encoding="utf-8") as fh:
+            original = fh.read()
+        baked, changed = bake_text(original, cache)
+        if changed:
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(baked)
+            total += changed
+            files += 1
+            print(f"baked {changed} size(s) into {os.path.relpath(path, REPO_ROOT)}")
+    return total, files
+
+
+def count_unbaked(cache):
+    """How many sized media tags still lack an aspect-ratio (for --check)."""
+    n = 0
+    for path in post_files():
+        with open(path, encoding="utf-8") as fh:
+            _, changed = bake_text(fh.read(), cache)
+        n += changed
+    return n
+
+
+def main():
+    check_only = "--check" in sys.argv[1:]
+
+    cache = {}
+    if os.path.exists(CACHE_PATH):
+        with open(CACHE_PATH, encoding="utf-8") as fh:
+            cache = json.load(fh)
+
+    urls = find_media_urls()
+    missing = sorted(u for u in urls if u not in cache)
+
+    if check_only:
+        problems = 0
+        if missing:
+            problems += len(missing)
+            print(f"{len(missing)} media URL(s) have no recorded size:", file=sys.stderr)
+            for u in missing:
+                print("  " + u, file=sys.stderr)
+        unbaked = count_unbaked(cache)
+        if unbaked:
+            problems += unbaked
+            print(f"{unbaked} sized media tag(s) not yet baked into source.", file=sys.stderr)
+        if problems:
+            print("Run scripts/measure_media to fix.", file=sys.stderr)
+            return 1
+        print(f"All {len(urls)} media URL(s) measured and baked.")
+        return 0
+
+    measured = 0
+    failed = []
+    for url in missing:
+        try:
+            if ext_of(url) in VIDEO_EXTS:
+                cache[url] = measure_video(url)
+            else:
+                cache[url] = measure_image(url)
+            measured += 1
+            print(f"measured {cache[url][0]}x{cache[url][1]}  {url}")
+        except Exception as exc:  # noqa: BLE001 - report and continue
+            failed.append(url)
+            print(f"WARN  could not measure {url}: {exc}", file=sys.stderr)
+
+    # prune entries for media no longer referenced anywhere
+    pruned = [u for u in cache if u not in urls]
+    for u in pruned:
+        del cache[u]
+
+    with open(CACHE_PATH, "w", encoding="utf-8") as fh:
+        json.dump(cache, fh, indent=0, sort_keys=True)
+        fh.write("\n")
+
+    baked, baked_files = bake_sources(cache)
+
+    print(
+        f"\n{measured} newly measured, {len(pruned)} pruned, {len(cache)} cached; "
+        f"baked {baked} size(s) into {baked_files} file(s)."
+    )
+    if failed:
+        print(
+            f"{len(failed)} could not be measured (left unsized; those will fall "
+            "back to on-load sizing).",
+            file=sys.stderr,
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

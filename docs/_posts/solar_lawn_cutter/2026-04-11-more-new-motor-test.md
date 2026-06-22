@@ -6,7 +6,7 @@ date: 2026-04-11 12:00:00 +0000
 
 Testing motors with more torque to prevent getting stuck:
 
-<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964944_51wKfXIc03L._SX522_.jpg" width="40%" />
+<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964944_51wKfXIc03L._SX522_.jpg" width="40%" style="aspect-ratio: 522 / 522" />
 
 [CHANCS DC Gear Fan Motor Brushless JS-50 5V 5RPM D-Shaft Gear Motor POM Plastic Gear Gearbox
 ](https://www.amazon.com/dp/B0D3DTJT3N)
@@ -15,17 +15,17 @@ At first mounted the motors low so the scissors were the correct level. However 
 
 First mounting position: 
 
-<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964467_20260411_161501.jpg" width="70%" />
+<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964467_20260411_161501.jpg" width="70%" style="aspect-ratio: 1324 / 993" />
 
 So I flipped the motor position to be higher than the axle. There's now heaps of clearance, but I'll need lower the scissors somehow.
 
 Second mounting position:
 
-<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964534_20260411_192613.jpg" width="70%" />
+<img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964534_20260411_192613.jpg" width="70%" style="aspect-ratio: 1324 / 993" />
 
 With that, the robot made it's first successful traversal of the yard 🎉
 
-<video controls width="70%"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964855_20260411_192938_1_1_1_1.mp4" type="video/mp4" ></video>
+<video controls width="70%" style="aspect-ratio: 1080 / 1920"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1775964855_20260411_192938_1_1_1_1.mp4" type="video/mp4" ></video>
 
 **video:** robot makes it across. Took 5 minutes realtime, video shows 16x speed
 

@@ -61,20 +61,23 @@ async function load() {
     });
   }
 
+  // Apply a project filter (shared by the sidebar, the mobile filter, and the
+  // clickable project label under each post).
+  function selectProject(project) {
+    state = { ...state, project };
+    setHash(state);
+    setActiveLinks(project);
+    const mf = document.getElementById('mobile-filter');
+    if (mf && mf.open) mf.open = false;
+    renderCurrent();
+    window.scrollTo({ top: 0 });
+  }
+
   function makeLink(label, project, nav) {
     const a = document.createElement('a');
     a.href = '#';
     a.textContent = label;
-    a.onclick = e => {
-      e.preventDefault();
-      state = { ...state, project };
-      setHash(state);
-      setActiveLinks(project);
-      if (document.getElementById('mobile-filter').open) {
-        document.getElementById('mobile-filter').open = false;
-      }
-      renderCurrent();
-    };
+    a.onclick = e => { e.preventDefault(); selectProject(project); };
     nav.appendChild(a);
     return a;
   }
@@ -239,16 +242,27 @@ async function load() {
 
     items.forEach(p => {
       const slug = slugFor(p.url);
+      const cats = (p.categories || []).map(c =>
+        `<a class="post-cat" href="#project=${c}" data-project="${c}">${c.replace(/_/g, ' ')}</a>`
+      ).join(', ');
       const article = document.createElement('article');
       article.className = 'post';
       article.id = 'post-' + slug;
       article.innerHTML = `
         <h2><a href="${p.url}">${p.title}</a></h2>
-        <div class="post-meta">${p.date}${p.categories && p.categories.length ? ' &middot; ' + p.categories.map(c => c.replace(/_/g, ' ')).join(', ') : ''}<a class="post-permalink" href="#post=${slug}" title="Copy link to this post" aria-label="Copy link to this post">#</a></div>
+        <div class="post-meta">${p.date}${cats ? ' &middot; ' + cats : ''}<a class="post-permalink" href="#post=${slug}" title="Copy link to this post" aria-label="Copy link to this post">#</a></div>
         <div class="post-content">${p.content}</div>
       `;
       feed.appendChild(article);
       setupClamp(article, article.querySelector('.post-content'));
+
+      // clicking the project label filters the feed to that project
+      article.querySelectorAll('.post-cat').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          selectProject(a.dataset.project);
+        });
+      });
 
       // permalink: copy the shareable URL without a disorienting re-scroll
       const link = article.querySelector('.post-permalink');

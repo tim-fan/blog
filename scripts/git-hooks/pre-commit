@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: keep every post's media sized so the feed never "jumps".
+#
+# Runs scripts/measure_media, which measures any *newly added* media (results
+# are cached in media_sizes.json, so this does no network I/O when nothing new
+# was added) and bakes a CSS aspect-ratio into the source <img>/<video> tags.
+# It then re-stages the cache and any staged posts the bake touched.
+#
+# Install:  cp scripts/git-hooks/pre-commit .git/hooks/pre-commit
+#       (or ln -sf ../../scripts/git-hooks/pre-commit .git/hooks/pre-commit)
+
+ROOT="$(git rev-parse --show-toplevel)" || exit 0
+cd "$ROOT" || exit 0
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "pre-commit: python3 not found — skipping media sizing." >&2
+  exit 0
+fi
+
+# Never block a commit on media sizing; warn and continue on failure.
+if ! python3 scripts/measure_media; then
+  echo "pre-commit: measure_media failed — committing without new sizes." >&2
+  exit 0
+fi
+
+# Re-stage results: the cache, plus any already-staged posts the bake edited.
+git add media_sizes.json 2>/dev/null
+git diff --name-only --cached -- docs/_posts | while IFS= read -r f; do
+  [ -f "$f" ] && git add -- "$f"
+done
+
+exit 0
