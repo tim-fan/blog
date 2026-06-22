@@ -8,6 +8,7 @@ markdown: kramdown
 
 
 
+
 defaults:
   - scope:
       path: "_posts/chalk_line_follower"
@@ -29,6 +30,11 @@ defaults:
       type: posts
     values:
       categories: [lets_read]
+  - scope:
+      path: "_posts/plane_search"
+      type: posts
+    values:
+      categories: [plane_search]
   - scope:
       path: "_posts/solar_lawn_cutter"
       type: posts
