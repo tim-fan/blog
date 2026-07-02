@@ -62,3 +62,4 @@ export R2_ENDPOINT=https://<account>.r2.cloudflarestorage.com
 export AWS_PROFILE=myr2profile
 ./scripts/embed_media ~/Downloads/pic.jpg
 ```
+
