@@ -9,6 +9,7 @@ markdown: kramdown
 
 
 
+
 defaults:
   - scope:
       path: "_posts/chalk_line_follower"
@@ -35,6 +36,11 @@ defaults:
       type: posts
     values:
       categories: [plane_search]
+  - scope:
+      path: "_posts/smartphone_plane_fix"
+      type: posts
+    values:
+      categories: [smartphone_plane_fix]
   - scope:
       path: "_posts/solar_lawn_cutter"
       type: posts
