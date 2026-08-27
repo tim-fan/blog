@@ -148,6 +148,11 @@
         margin: 0.5rem auto;
         display: block;
       }
+      /* Media that reads better narrow on desktop but should fill the
+         column on phones — width is overridden in the responsive section. */
+      .post-content .media-narrow {
+        width: 70%;
+      }
       /* Reserve space before media loads so the feed doesn't reflow.
          Exact per-element ratios are baked into the source <img>/<video>
          tags by scripts/measure_media; these are fallbacks for anything
@@ -360,6 +365,7 @@
       /* ── responsive ── */
       @media (max-width: 640px) {
         :root { --gap: 1rem; }
+        .post-content .media-narrow { width: 100%; }
         .sidebar { display: none; }
         .page-shell { flex-direction: column; gap: 0; }
         .mobile-filter {
