@@ -28,8 +28,8 @@ Claude suggests isopropyl alcohol to loosen the glue holding the body foam toget
 Found a close-enough replacement on Amazon. Tricky soldering job with my $20 iron, but got it connected and powering up ⚡
 <figure>
 <div style="display: flex; gap: 0.5rem; align-items: flex-start;" >
-  <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787804705_20260809_083205.jpg" alt="20260809_083205.jpg" style="flex: 1; min-width: 0; aspect-ratio: 4000 / 3000">
-  <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787803632_20260825_193048.jpg" alt="20260825_193048.jpg" style="flex: 1; min-width: 0; aspect-ratio: 4000 / 3000">
+  <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787804705_20260809_083205.jpg" alt="20260809_083205.jpg" style="flex: 1; min-width: 0; aspect-ratio: 3000 / 4000">
+  <img src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787803632_20260825_193048.jpg" alt="20260825_193048.jpg" style="flex: 1; min-width: 0; aspect-ratio: 3000 / 4000">
 </div>
 <figcaption>Out with the old in with the new</figcaption>
 </figure>
@@ -38,7 +38,7 @@ Claude followed up with a static web app for connecting to and controlling the p
 
 Then to the successful flight test - it flies well!
 
-<video controls width="50%" style="aspect-ratio: 1080 / 1920"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787808044_moskito.mp4" type="video/mp4"></video>
+<video controls class="media-narrow" style="aspect-ratio: 1080 / 1920"><source src="https://pub-e97d8798980d424ab1af22fba84810e3.r2.dev/1787808044_moskito.mp4" type="video/mp4"></video>
 
 In conclusion - the Moskito flies again 🦟
 
